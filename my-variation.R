@@ -1,9 +1,18 @@
+# Author: Gabriel Dell'Accio
+
+# This model alters the original schelling model of segregation by 
+# adding a property cost and wealth parameter to the function that determines
+# whether an individual is unhappy or not. In this implementation, blue individuals
+# are given more money while red indivuals are given less. Property cost is greater the
+# closer you are to the center of the grid. Individuals take a similarity cost when 
+# are in placed in a position with a higher property cost than their wealth value.
+
 # model parameters ####
 rows <- 50 
 cols <- 50
 proportion.group.1 <- .5 # proportion of red agents
-empty <- .2 # proportion of grid that will be empty space
-min.similarity <- 3/8 # minimum proportion of neighbors that are the same type to not move
+empty <- .6# proportion of grid that will be empty space
+min.similarity <- 4/8 # minimum proportion of neighbors that are the same type to not move
 center.grid <- c(25,25)
 
 # create.grid ####
@@ -169,7 +178,7 @@ create.wealth.matrix <- function(rows, col) {
     for(j in 1:col){
       currentIndex <- c(i,j)
       
-      wealth.grid[i,j] <<- assign.wealth(wealth.grid[i,j], runif(1,0,1), runif(1,0,1))
+      wealth.grid[i,j] <<- assign.wealth(wealth.grid[i,j], runif(1,0,.5), runif(1,.5,1))
     }
   }
 }
