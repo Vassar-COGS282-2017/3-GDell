@@ -4,6 +4,7 @@ cols <- 50
 proportion.group.1 <- .5 # proportion of red agents
 empty <- .2 # proportion of grid that will be empty space
 min.similarity <- 3/8 # minimum proportion of neighbors that are the same type to not move
+center.grid <- c(25,25)
 
 # create.grid ####
 # generates a rows x column matrix and randomly places the initial population
@@ -26,6 +27,7 @@ create.grid <- function(rows, cols, proportion.group.1, empty){
 # outputs a visualization of the grid, with red squares representing group 1,
 # blue squares group 2, and black squares empty locations.
 visualize.grid <- function(grid){
+  # Produces visualization of a matrix.
   image(grid, col=c('black','red','blue'), xaxs=NULL, yaxs=NULL, xaxt='n', yaxt='n')
 }
 
@@ -43,6 +45,7 @@ empty.locations <- function(grid){
 # ignoring empty cells. the center.val must be specified
 # manually in case the grid has an even number of rows or 
 # columns
+# Used to calculate neighborhood similarity. What proportion of neighbors match the center value.
 similarity.to.center <- function(grid.subset, center.val){
   if(center.val == 0){ return(NA) }
   same <- sum(grid.subset==center.val) - 1
@@ -90,14 +93,60 @@ unhappy.agents <- function(grid, min.similarity){
   return(which(grid.copy==FALSE, arr.ind = T))
 }
 
+
+# assign.property.cost
+
+
+assign.property.cost <- function(center, currentIndex) {
+  rowDiff <- abs(center[1] - currentIndex[1])
+  columnDiff <- abs(center[2] - currentIndex[2])
+  totalDifference <- rowDiff + columnDiff
+  print(paste("THE TOTLA DIFF IS :",totalDifference))
+  return(totalDifference)
+}
+
+create.property.matrix <- function(rowsVec, colVec) {
+  center <- c(rowsVec/2, colVec/2)
+  
+  property.grid <<- matrix(nrow=rowsVec, ncol=colVec)
+  temp <- c()
+
+  for(i in 1:rowsVec) {
+    for(j in 1:colVec){
+      temp[i] <- assign.property.cost(center,c(i,j))
+      print(temp[i])
+      property.grid[i,j] <- temp[i]
+    }
+  }
+  
+
+}
+
+create.property.matrix(rows, cols)
+
 # one.round ####
 # runs a single round of the simulation. the round starts by finding
 # all of the unhappy agents and empty spaces. then unhappy agents are randomly
 # assigned to a new empty location. a new grid is generated to reflect all of
 # the moves that took place.
 one.round <- function(grid, min.similarity){
-  
+  empty.spaces <- empty.locations(grid)
+  unhappy <- unhappy.agents(grid, min.similarity)
+  empty.spaces <- empty.spaces[sample(1:nrow(empty.spaces)), ]
+  for(i in 1:nrow(empty.spaces)) {
+    
+    if(i>nrow(unhappy)){ 
+      break;
+    }
+    # Move unhappy to empty spaces.
+    grid[empty.spaces[i,1], empty.spaces[i,2]] <- grid[unhappy[i,1],unhappy[i,2]]
+    # A blank space.
+    grid[unhappy[i,1], unhappy[i,2]] <- 0
+  }
+  return(grid)
 }
+
+
 
 # running the simulation ####
 done <- FALSE # a variable to keep track of whether the simulation is complete
